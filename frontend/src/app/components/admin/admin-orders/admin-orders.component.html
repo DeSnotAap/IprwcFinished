@@ -1,0 +1,212 @@
+<div class="admin-orders">
+  <h2>Order Management</h2>
+  
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading orders...</p>
+  </div>
+  
+  <!-- Error state -->
+  <div *ngIf="error" class="error-container">
+    <p>{{ errorMessage }}</p>
+    <button class="btn-primary" (click)="loadOrders()">Retry</button>
+  </div>
+  
+  <!-- Orders table -->
+  <div *ngIf="!isLoading && !error" class="orders-container">
+    <div class="table-actions">
+      <button class="refresh-btn" (click)="loadOrders()">Refresh Orders</button>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of orders">
+            <td>#{{ order.id }}</td>
+            <td>{{ order.firstName }} {{ order.lastName }}</td>
+            <td>{{ order.orderDate | date:'short' }}</td>
+            <td>{{ order.totalQuantity }}</td>
+            <td>{{ order.totalPrice | currency:'EUR' }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="order.status.toLowerCase()">{{ order.status }}</span>
+            </td>
+            <td>
+              <button class="view-btn" (click)="viewOrderDetails(order)">View Details</button>
+              <button class="edit-btn" (click)="editOrderFromTable(order)">Edit</button>
+              <button class="delete-btn" (click)="deleteOrder(order.id)">Delete</button>
+            </td>
+          </tr>
+          <tr *ngIf="orders.length === 0">
+            <td colspan="7" class="no-data">No orders found</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Order Details Modal -->
+  <div *ngIf="selectedOrder" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Order #{{ selectedOrder.id }} Details</h3>
+        <button class="close-btn" (click)="closeOrderDetails()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Success message -->
+        <div *ngIf="updateSuccess" class="alert-success">
+          Order updated successfully!
+        </div>
+        
+        <!-- Error message -->
+        <div *ngIf="updateError" class="alert-danger">
+          {{ updateErrorMessage }}
+        </div>
+        
+        <!-- View Mode -->
+        <div *ngIf="!editMode" class="order-info">
+          <div class="info-section">
+            <h4>Order Information</h4>
+            <p><strong>Order ID:</strong> #{{ selectedOrder.id }}</p>
+            <p><strong>Date:</strong> {{ selectedOrder.orderDate | date:'medium' }}</p>
+            <p><strong>Status:</strong> <span class="status-badge" [ngClass]="selectedOrder.status.toLowerCase()">{{ selectedOrder.status }}</span></p>
+            <p><strong>Total Items:</strong> {{ selectedOrder.totalQuantity }}</p>
+            <p><strong>Total Price:</strong> {{ selectedOrder.totalPrice | currency:'EUR' }}</p>
+          </div>
+          
+          <div class="info-section">
+            <h4>Customer Information</h4>
+            <p><strong>Name:</strong> {{ selectedOrder.firstName }} {{ selectedOrder.lastName }}</p>
+            <p><strong>Email:</strong> {{ selectedOrder.email }}</p>
+            <p><strong>Address:</strong> {{ selectedOrder.address }}</p>
+          </div>
+        </div>
+        
+        <!-- Edit Mode -->
+        <div *ngIf="editMode" class="order-edit-form">
+          <form [formGroup]="orderForm" (ngSubmit)="saveOrderDetails()">
+            <div class="form-group">
+              <label for="firstName">First Name</label>
+              <input 
+                type="text" 
+                id="firstName" 
+                formControlName="firstName" 
+                class="form-control"
+                [class.is-invalid]="orderForm.get('firstName')?.invalid && orderForm.get('firstName')?.touched"
+              >
+              <div *ngIf="orderForm.get('firstName')?.invalid && orderForm.get('firstName')?.touched" class="error-feedback">
+                <div *ngIf="orderForm.get('firstName')?.errors?.['required']">First name is required.</div>
+                <div *ngIf="orderForm.get('firstName')?.errors?.['maxlength']">First name cannot exceed 50 characters.</div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="lastName">Last Name</label>
+              <input 
+                type="text" 
+                id="lastName" 
+                formControlName="lastName" 
+                class="form-control"
+                [class.is-invalid]="orderForm.get('lastName')?.invalid && orderForm.get('lastName')?.touched"
+              >
+              <div *ngIf="orderForm.get('lastName')?.invalid && orderForm.get('lastName')?.touched" class="error-feedback">
+                <div *ngIf="orderForm.get('lastName')?.errors?.['required']">Last name is required.</div>
+                <div *ngIf="orderForm.get('lastName')?.errors?.['maxlength']">Last name cannot exceed 50 characters.</div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input 
+                type="email" 
+                id="email" 
+                formControlName="email" 
+                class="form-control"
+                [class.is-invalid]="orderForm.get('email')?.invalid && orderForm.get('email')?.touched"
+              >
+              <div *ngIf="orderForm.get('email')?.invalid && orderForm.get('email')?.touched" class="error-feedback">
+                <div *ngIf="orderForm.get('email')?.errors?.['required']">Email is required.</div>
+                <div *ngIf="orderForm.get('email')?.errors?.['email']">Please enter a valid email address.</div>
+                <div *ngIf="orderForm.get('email')?.errors?.['maxlength']">Email cannot exceed 50 characters.</div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="address">Address</label>
+              <textarea 
+                id="address" 
+                formControlName="address" 
+                class="form-control"
+                [class.is-invalid]="orderForm.get('address')?.invalid && orderForm.get('address')?.touched"
+              ></textarea>
+              <div *ngIf="orderForm.get('address')?.invalid && orderForm.get('address')?.touched" class="error-feedback">
+                <div *ngIf="orderForm.get('address')?.errors?.['required']">Address is required.</div>
+                <div *ngIf="orderForm.get('address')?.errors?.['maxlength']">Address cannot exceed 255 characters.</div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="status">Status</label>
+              <select 
+                id="status" 
+                formControlName="status" 
+                class="form-control status-select"
+                [class.is-invalid]="orderForm.get('status')?.invalid && orderForm.get('status')?.touched"
+              >
+                <option *ngFor="let option of statusOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+              <div *ngIf="orderForm.get('status')?.invalid && orderForm.get('status')?.touched" class="error-feedback">
+                <div *ngIf="orderForm.get('status')?.errors?.['required']">Status is required.</div>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" class="save-btn" [disabled]="orderForm.invalid">Save Changes</button>
+              <button type="button" class="cancel-btn" (click)="cancelEdit()">Cancel</button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="order-items">
+          <h4>Order Items</h4>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Book</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of selectedOrder.items">
+                <td>{{ item.title }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.price | currency:'EUR' }}</td>
+                <td>{{ item.quantity * item.price | currency:'EUR' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="delete-section" *ngIf="!editMode">
+          <h4>Delete Order</h4>
+          <button class="delete-btn full-width" (click)="deleteOrder(selectedOrder.id)">Delete Order</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

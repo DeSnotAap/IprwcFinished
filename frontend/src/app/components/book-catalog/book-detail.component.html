@@ -1,0 +1,58 @@
+<div class="book-detail-container">
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    <p>An error occurred while loading the book. Please try again later.</p>
+    <button routerLink="/books" class="btn-primary">Back to Catalog</button>
+  </div>
+
+  <div *ngIf="!loading && !error && book" class="book-detail">
+    <div class="navigation-links">
+      <a routerLink="/books" class="back-link">
+        <i class="fa fa-arrow-left"></i> Back to Catalog
+      </a>
+    </div>
+
+    <div class="book-content">
+      <div class="book-image-container">
+        <img [src]="book.imageUrl" [alt]="book.title" class="book-image">
+      </div>
+      
+      <div class="book-info">
+        <span class="book-category">{{ book.categoryName }}</span>
+        <h1 class="book-title">{{ book.title }}</h1>
+        <p class="book-author">by {{ book.author }}</p>
+        
+        <div class="book-meta">
+          <div class="meta-item">
+            <span class="meta-label">Publication Date:</span>
+            <span class="meta-value">{{ book.publishedDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+        
+        <div class="book-price">{{ book.price | currency:'EUR' }}</div>
+        
+        <div class="add-to-cart" *ngIf="!authService.isAdmin()">
+          <div class="quantity-control">
+            <button (click)="decreaseQuantity()" class="quantity-btn" [disabled]="quantity <= 1 || addingToCart">-</button>
+            <span class="quantity-display">{{ quantity }}</span>
+            <button (click)="increaseQuantity()" class="quantity-btn" [disabled]="addingToCart">+</button>
+          </div>
+          
+          <button (click)="addToCart()" class="btn-primary add-to-cart-btn" [disabled]="addingToCart">
+            <span *ngIf="!addingToCart">Add to Cart</span>
+            <span *ngIf="addingToCart">Adding...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="book-description">
+      <h2>Description</h2>
+      <p>{{ book.description }}</p>
+    </div>
+  </div>
+</div> 

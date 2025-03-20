@@ -1,0 +1,75 @@
+<div class="app-container">
+  <header class="app-header">
+    <div class="container">
+      <div class="logo">
+        <a routerLink="/">
+          <span class="logo-text">Bookshop</span>
+        </a>
+      </div>
+      
+      <nav class="main-nav">
+        <ul>
+          <li><a routerLink="/books" routerLinkActive="active">Catalog</a></li>
+          <li><a routerLink="/categories" routerLinkActive="active">Categories</a></li>
+          <li *ngIf="authService.isAdmin()">
+            <a routerLink="/admin" routerLinkActive="active">Admin Dashboard</a>
+          </li>
+          <li *ngIf="isLoggedIn && !authService.isAdmin()">
+            <a routerLink="/cart" routerLinkActive="active" class="cart-link">
+              Cart
+              <app-cart-badge></app-cart-badge>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="auth-buttons">
+        <ng-container *ngIf="!isLoggedIn; else loggedInButtons">
+          <a routerLink="/login" class="btn-login">Login</a>
+          <a routerLink="/register" class="btn-register">Register</a>
+        </ng-container>
+        <ng-template #loggedInButtons>
+          <span class="user-welcome" *ngIf="currentUser">
+            Welcome, {{ currentUser.username }}
+          </span>
+          <button (click)="logout()" class="btn-logout">Logout</button>
+        </ng-template>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>Bookshop</h3>
+          <p>Your online bookstore for quality books.</p>
+        </div>
+        
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a routerLink="/books">Catalog</a></li>
+            <li><a routerLink="/categories">Categories</a></li>
+            <li><a routerLink="/about">About Us</a></li>
+            <li><a routerLink="/contact">Contact</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <p>Email: bookshop@email.com</p>
+          <p>Phone: +31 6 12345678</p>
+        </div>
+      </div>
+      
+      <div class="copyright">
+        <p>&copy; 2025 Bookshop. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</div> 

@@ -103,7 +103,6 @@ export class CartService {
     this.http.get<{ count: number }>(`${API_URL}/count`).subscribe({
       next: (response) => this.cartCountSubject.next(response.count),
       error: (error) => {
-          console.log('Error loading cart count:');
         // Handle 401 errors quietly, just reset cart count
         if (error.status === 401) {
           this.cartCountSubject.next(0);

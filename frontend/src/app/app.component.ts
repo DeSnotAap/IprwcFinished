@@ -25,7 +25,6 @@ export class AppComponent implements OnInit {
     const token = localStorage.getItem('auth-token');
     if (token) {
       // Token exists, user is logged in
-      console.log('User is logged in with token');
     }
 
     console.log('Testing API connections...');

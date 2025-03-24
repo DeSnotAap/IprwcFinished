@@ -4,6 +4,10 @@ import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { AddToCartRequest, Cart, CartItem, UpdateCartItemRequest } from '../models/cart.model';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
+
+const API_URL = environment.apiUrl + '/cart';
+
 
 @Injectable({
   providedIn: 'root'
@@ -44,7 +48,7 @@ export class CartService {
         total: 0 
       } as Cart);
     }
-    return this.http.get<Cart>(this.apiUrl).pipe(
+    return this.http.get<Cart>(this.API_URL).pipe(
       tap(cart => this.cartSubject.next(cart))
     );
   }
@@ -57,7 +61,7 @@ export class CartService {
       return of({} as CartItem);
     }
     const request: AddToCartRequest = { bookId, quantity };
-    return this.http.post<CartItem>(`${this.apiUrl}/items`, request).pipe(
+    return this.http.post<CartItem>(`${this.API_URL}/items`, request).pipe(
       tap(() => this.loadCartCount())
     );
   }
@@ -70,7 +74,7 @@ export class CartService {
       return of({} as CartItem);
     }
     const request: UpdateCartItemRequest = { quantity };
-    return this.http.put<CartItem>(`${this.apiUrl}/items/${itemId}`, request).pipe(
+    return this.http.put<CartItem>(`${this.API_URL}/items/${itemId}`, request).pipe(
       tap(() => this.loadCartCount())
     );
   }
@@ -82,7 +86,7 @@ export class CartService {
     if (this.isAdmin()) {
       return of({});
     }
-    return this.http.delete(`${this.apiUrl}/items/${itemId}`).pipe(
+    return this.http.delete(`${this.API_URL}/items/${itemId}`).pipe(
       tap(() => this.loadCartCount())
     );
   }
@@ -95,7 +99,7 @@ export class CartService {
       this.cartCountSubject.next(0);
       return;
     }
-    this.http.get<{ count: number }>(`${this.apiUrl}/count`).subscribe(
+    this.http.get<{ count: number }>(`${this.API_URL}/count`).subscribe(
       response => this.cartCountSubject.next(response.count),
       error => console.error('Error loading cart count:', error)
     );
@@ -108,7 +112,7 @@ export class CartService {
     if (this.isAdmin()) {
       return of({});
     }
-    return this.http.delete(this.apiUrl).pipe(
+    return this.http.delete(this.API_URL).pipe(
       tap(() => {
         this.cartCountSubject.next(0);
         this.cartSubject.next(null);

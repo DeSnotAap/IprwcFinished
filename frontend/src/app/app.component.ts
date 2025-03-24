@@ -15,6 +15,7 @@ export class AppComponent implements OnInit {
   constructor(
     private router: Router,
     public authService: AuthService,
+    private cartService: CartService,
     private http: HttpClient
   ) {}
 
@@ -58,7 +59,9 @@ export class AppComponent implements OnInit {
   }
 
   logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.cartService.clearCart().subscribe(() => {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+    });
   }
 } 

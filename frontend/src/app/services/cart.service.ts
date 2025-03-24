@@ -13,7 +13,7 @@ const API_URL = environment.apiUrl + '/cart';
   providedIn: 'root'
 })
 export class CartService {
-  private apiUrl = 'http://localhost:8081/api/cart';
+  //private apiUrl = 'http://localhost:8081/api/cart';
   private cartSubject = new BehaviorSubject<Cart | null>(null);
   public cart$ = this.cartSubject.asObservable();
 
@@ -48,7 +48,7 @@ export class CartService {
         total: 0 
       } as Cart);
     }
-    return this.http.get<Cart>(this.API_URL).pipe(
+    return this.http.get<Cart>(API_URL).pipe(
       tap(cart => this.cartSubject.next(cart))
     );
   }
@@ -61,7 +61,7 @@ export class CartService {
       return of({} as CartItem);
     }
     const request: AddToCartRequest = { bookId, quantity };
-    return this.http.post<CartItem>(`${this.API_URL}/items`, request).pipe(
+    return this.http.post<CartItem>(`${API_URL}/items`, request).pipe(
       tap(() => this.loadCartCount())
     );
   }
@@ -74,7 +74,7 @@ export class CartService {
       return of({} as CartItem);
     }
     const request: UpdateCartItemRequest = { quantity };
-    return this.http.put<CartItem>(`${this.API_URL}/items/${itemId}`, request).pipe(
+    return this.http.put<CartItem>(`${API_URL}/items/${itemId}`, request).pipe(
       tap(() => this.loadCartCount())
     );
   }
@@ -86,7 +86,7 @@ export class CartService {
     if (this.isAdmin()) {
       return of({});
     }
-    return this.http.delete(`${this.API_URL}/items/${itemId}`).pipe(
+    return this.http.delete(`${API_URL}/items/${itemId}`).pipe(
       tap(() => this.loadCartCount())
     );
   }
@@ -99,7 +99,7 @@ export class CartService {
       this.cartCountSubject.next(0);
       return;
     }
-    this.http.get<{ count: number }>(`${this.API_URL}/count`).subscribe(
+    this.http.get<{ count: number }>(`${API_URL}/count`).subscribe(
       response => this.cartCountSubject.next(response.count),
       error => console.error('Error loading cart count:', error)
     );
@@ -112,7 +112,7 @@ export class CartService {
     if (this.isAdmin()) {
       return of({});
     }
-    return this.http.delete(this.API_URL).pipe(
+    return this.http.delete(API_URL).pipe(
       tap(() => {
         this.cartCountSubject.next(0);
         this.cartSubject.next(null);

@@ -60,9 +60,20 @@ export class AppComponent implements OnInit {
   }
 
   logout() {
-    this.cartService.clearCart().subscribe(() => {
-      this.authService.logout();
-      this.router.navigate(['/login']);
+    // Clear the cart first
+    this.cartService.clearCart().subscribe({
+      next: () => {
+        // Then logout and navigate
+        this.authService.logout();
+        this.router.navigate(['/login']);
+        console.log('Is het klaar nu?');
+      },
+      error: (error) => {
+        // If clearing cart fails, still logout
+        console.error('Error clearing cart:', error);
+        this.authService.logout();
+        this.router.navigate(['/login']);
+      }
     });
   }
 } 

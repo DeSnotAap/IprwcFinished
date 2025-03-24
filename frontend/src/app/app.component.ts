@@ -65,7 +65,6 @@ export class AppComponent implements OnInit {
         // Then logout and navigate
         this.authService.logout();
         this.router.navigate(['/login']);
-        console.log('Is het klaar nu?');
       },
       error: (error) => {
         // If clearing cart fails, still logout

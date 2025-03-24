@@ -38,8 +38,8 @@ export class CartService {
    * Get the current user's cart
    */
   getCart(): Observable<Cart> {
-    if (this.isAdmin()) {
-      // Return empty cart for admins
+    if (!this.authService.isLoggedIn() || this.isAdmin()) {
+        // Return empty cart for admins or unauthenticated users
       return of({ 
         id: 0, 
         items: [], 
@@ -57,7 +57,7 @@ export class CartService {
    * Add an item to the cart
    */
   addToCart(bookId: number, quantity: number): Observable<CartItem> {
-    if (this.isAdmin()) {
+    if (!this.authService.isLoggedIn() || this.isAdmin()) {
       return of({} as CartItem);
     }
     const request: AddToCartRequest = { bookId, quantity };
@@ -70,7 +70,7 @@ export class CartService {
    * Update cart item quantity
    */
   updateQuantity(itemId: number, quantity: number): Observable<CartItem> {
-    if (this.isAdmin()) {
+    if (!this.authService.isLoggedIn() || this.isAdmin()) {
       return of({} as CartItem);
     }
     const request: UpdateCartItemRequest = { quantity };
@@ -83,7 +83,7 @@ export class CartService {
    * Remove an item from the cart
    */
   removeItem(itemId: number): Observable<any> {
-    if (this.isAdmin()) {
+    if (!this.authService.isLoggedIn() || this.isAdmin()) {
       return of({});
     }
     return this.http.delete(`${API_URL}/items/${itemId}`).pipe(
@@ -95,21 +95,29 @@ export class CartService {
    * Get the number of items in the cart
    */
   loadCartCount(): void {
-    if (this.isAdmin()) {
+    if (!this.authService.isLoggedIn() || this.isAdmin()) {
       this.cartCountSubject.next(0);
       return;
     }
-    this.http.get<{ count: number }>(`${API_URL}/count`).subscribe(
-      response => this.cartCountSubject.next(response.count),
-      error => console.error('Error loading cart count:', error)
-    );
+    
+    this.http.get<{ count: number }>(`${API_URL}/count`).subscribe({
+      next: (response) => this.cartCountSubject.next(response.count),
+      error: (error) => {
+        // Handle 401 errors quietly, just reset cart count
+        if (error.status === 401) {
+          this.cartCountSubject.next(0);
+        } else {
+          console.error('Error loading cart count:', error);
+        }
+      }
+    });
   }
   
   /**
    * Clear the cart
    */
   clearCart(): Observable<any> {
-    if (this.isAdmin()) {
+    if (!this.authService.isLoggedIn() || this.isAdmin()) {
       return of({});
     }
     return this.http.delete(API_URL).pipe(

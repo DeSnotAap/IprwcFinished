@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from './services/auth.service';
+import { CartService } from './services/cart.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
 
